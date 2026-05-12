@@ -6,6 +6,7 @@ Load the relevant skill before running a workflow.
 
 - `mini-agi-onboarding` — set up a new repository from the template.
 - `source-watchlist-management` — add and maintain observed sources.
+- `ingestion-pipeline` — validate and extend staged source ingestion.
 - `github-org-discovery` — bootstrap a GitHub organization into raw evidence and wiki pages.
 - `github-daily-ingestion` — run recurring GitHub evidence ingestion.
 - `evidence-to-wiki-synthesis` — turn raw evidence into compact wiki updates.

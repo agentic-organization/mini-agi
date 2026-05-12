@@ -54,6 +54,7 @@ Observe → Ingest raw evidence → Synthesize wiki pages → Cross-link → Ope
 - [Getting started](docs/GETTING_STARTED.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [Operating loop](docs/OPERATING_LOOP.md)
+- [Ingestion pipeline](docs/INGESTION_PIPELINE.md)
 - [Privacy and data handling](docs/PRIVACY_AND_DATA.md)
 - [Example walkthrough](docs/EXAMPLE_WALKTHROUGH.md)
 

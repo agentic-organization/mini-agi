@@ -134,6 +134,7 @@ Important skills:
 
 - `mini-agi-onboarding` — set up a new repository from the template.
 - `source-watchlist-management` — add and maintain observed sources.
+- `ingestion-pipeline` — validate and extend staged source ingestion.
 - `github-daily-ingestion` — daily GitHub evidence pipeline.
 - `github-org-discovery` — bootstrap a GitHub organization into wiki pages.
 - `evidence-to-wiki-synthesis` — turn raw evidence into compact wiki updates.

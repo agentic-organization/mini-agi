@@ -16,9 +16,14 @@ Output:
 ```text
 data/raw/github/org-discovery/<YYYY-MM-DD>/<org>/snapshot.json
 data/raw/github/daily/<YYYY-MM-DD>/<owner>/<repo>/*.json
+data/raw/github/daily/<YYYY-MM-DD>/manifest.json
 data/raw/github/daily/<YYYY-MM-DD>/run.json
 data/raw/github/daily/<YYYY-MM-DD>/commands.sh
 ```
+
+`manifest.json` is the standard pipeline manifest. `run.json` is a GitHub-specific summary kept for compatibility and human inspection.
+
+Flags: `--watchlist <path>`, `--out <path>`, `--date <YYYY-MM-DD>`, `--since-hours N`, `--limit N`, `--only owner/repo`, `--run-id <id>`, `--dry-run`, `--force`.
 
 ## `github-org-discover.js`
 

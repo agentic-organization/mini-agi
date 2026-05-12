@@ -18,6 +18,7 @@
  *   --only <owner/repo>  Fetch one resolved repo
  *   --dry-run            Print resolved repos and commands; write nothing
  *   --force              Allow overwriting an existing daily run directory
+ *   --run-id <id>        Default: <YYYYMMDDTHHMMSSZ>-github-daily
  *   --help               Print help
  */
 
@@ -49,6 +50,8 @@ const FORCE = flag('--force');
 
 const startedAt = new Date().toISOString();
 const since = new Date(Date.now() - SINCE_HOURS * 3600 * 1000).toISOString();
+const defaultRunId = `${startedAt.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z')}-github-daily`;
+const RUN_ID = valFlag('--run-id', defaultRunId);
 const dailyRoot = path.join(OUT_ROOT, 'daily', DATE);
 const orgRoot = path.join(OUT_ROOT, 'org-discovery', DATE);
 
@@ -271,7 +274,7 @@ async function main() {
   }
 
   if (DRY_RUN) {
-    console.log(JSON.stringify({ date: DATE, since, repositories: resolved.repositories.map((r) => `${r.owner}/${r.name}`), errors: resolved.errors, commands }, null, 2));
+    console.log(JSON.stringify({ run_id: RUN_ID, date: DATE, since, repositories: resolved.repositories.map((r) => `${r.owner}/${r.name}`), errors: resolved.errors, commands }, null, 2));
     return;
   }
 
@@ -287,18 +290,23 @@ async function main() {
     repoResults.push(await fetchRepo(repo, commands));
   }
 
+  const finishedAt = new Date().toISOString();
+  const reposSucceeded = repoResults.filter((repo) => repo.endpoints.every((endpoint) => endpoint.ok)).length;
+  const reposWithErrors = repoResults.filter((repo) => repo.endpoints.some((endpoint) => !endpoint.ok)).length;
+  const status = resolved.errors.length || reposWithErrors ? 'partial' : 'success';
   const run = {
     source: 'github-daily-ingest',
+    run_id: RUN_ID,
     started_at: startedAt,
-    finished_at: new Date().toISOString(),
+    finished_at: finishedAt,
     date: DATE,
     since,
     since_hours: SINCE_HOURS,
     watchlist: WATCHLIST_PATH,
     out_root: OUT_ROOT,
     repos_attempted: repoResults.length,
-    repos_succeeded: repoResults.filter((repo) => repo.endpoints.every((endpoint) => endpoint.ok)).length,
-    repos_with_errors: repoResults.filter((repo) => repo.endpoints.some((endpoint) => !endpoint.ok)).length,
+    repos_succeeded: reposSucceeded,
+    repos_with_errors: reposWithErrors,
     watchlist_errors: resolved.errors,
     repositories: repoResults.map((repo) => ({
       full_name: repo.full_name,
@@ -308,9 +316,63 @@ async function main() {
     }))
   };
 
+  const outputEntries = [
+    { path: path.join(dailyRoot, 'run.json'), kind: 'legacy_run_summary', count: 1 },
+    { path: path.join(dailyRoot, 'commands.sh'), kind: 'command_log', count: commands.length }
+  ];
+  for (const repo of repoResults) {
+    outputEntries.push({ path: path.join(dailyRoot, repo.owner, repo.repo, 'meta.json'), kind: 'repo_meta', count: 1 });
+    for (const endpoint of repo.endpoints) {
+      outputEntries.push({
+        path: path.join(dailyRoot, repo.owner, repo.repo, endpoint.file),
+        kind: `github_${endpoint.key}`,
+        count: endpoint.count ?? null
+      });
+    }
+  }
+  for (const { owner } of resolved.orgSnapshots) {
+    outputEntries.push({ path: path.join(orgRoot, owner, 'snapshot.json'), kind: 'org_snapshot', count: 1 });
+  }
+
+  const manifest = {
+    schema_version: 1,
+    run_id: RUN_ID,
+    source: 'github',
+    stage: 'raw',
+    status,
+    source_config: WATCHLIST_PATH,
+    collector: 'tools/ingestion/github-daily-ingest.js',
+    started_at: startedAt,
+    finished_at: finishedAt,
+    inputs: {
+      date: DATE,
+      since,
+      since_hours: SINCE_HOURS,
+      only: ONLY || null,
+      limit: LIMIT,
+      watchlist: WATCHLIST_PATH,
+      out_root: OUT_ROOT
+    },
+    outputs: outputEntries,
+    errors: [
+      ...resolved.errors.map((error) => ({ source: error.source || null, message: error.error || error.message || String(error), detail: error })),
+      ...repoResults.flatMap((repo) => repo.endpoints
+        .filter((endpoint) => !endpoint.ok)
+        .map((endpoint) => ({ source: `${repo.owner}/${repo.repo}`, message: endpoint.error, detail: endpoint })))
+    ],
+    stats: {
+      repos_attempted: repoResults.length,
+      repos_succeeded: reposSucceeded,
+      repos_with_errors: reposWithErrors,
+      org_snapshots: resolved.orgSnapshots.length,
+      commands: commands.length
+    }
+  };
+
   writeJson(path.join(dailyRoot, 'run.json'), run);
+  writeJson(path.join(dailyRoot, 'manifest.json'), manifest);
   fs.writeFileSync(path.join(dailyRoot, 'commands.sh'), ['#!/usr/bin/env bash', 'set -euo pipefail', ...commands].join('\n') + '\n');
-  console.log(JSON.stringify({ daily_root: dailyRoot, org_root: orgRoot, repos_attempted: run.repos_attempted, repos_with_errors: run.repos_with_errors }, null, 2));
+  console.log(JSON.stringify({ run_id: RUN_ID, manifest: path.join(dailyRoot, 'manifest.json'), daily_root: dailyRoot, org_root: orgRoot, repos_attempted: run.repos_attempted, repos_with_errors: run.repos_with_errors, status }, null, 2));
 }
 
 main().catch((err) => {
