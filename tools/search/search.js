@@ -4,8 +4,8 @@
  *
  * Usage:
  *   node tools/search/search.js "your query here"
- *   node tools/search/search.js --k 10 --bm25-only "api gateway deploy"
- *   node tools/search/search.js --json "alice payment-platform"
+ *   node tools/search/search.js --k 10 --bm25-only "nutshell python mint"
+ *   node tools/search/search.js --json "callebtc cashu"
  *
  * Flags:
  *   --k <N>                Number of results. Default: 8.
@@ -134,12 +134,28 @@ function loadEmbeddings() {
 }
 
 function embedQuery(queryText, modelId) {
-  // Shell out to tools/search/embed.py --query
-  const out = execFileSync('python3', [
+  // Prefer a local venv python (e.g. repo-root/.venv/bin/python) so that
+  // sentence-transformers and numpy are found even when the system python3
+  // does not have them (common on CI / container / Hermes hosts).
+  const root = path.resolve(path.join(__dirname, '../..'));
+  const candidates = [
+    path.join(root, '.venv', 'bin', 'python'),
+    path.join(root, 'venv', 'bin', 'python'),
+    'python3',
+    'python',
+  ];
+  let python = candidates.find(p => {
+    try { fs.accessSync(p, fs.constants.X_OK); return true; } catch { return false; }
+  });
+  if (!python) python = 'python3';
+
+  const out = execFileSync(python, [
     path.join(__dirname, 'embed.py'),
     '--query', queryText,
     '--model', modelId,
-  ], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+  ], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024,
+      env: { ...process.env, PYTHONPATH: '' }
+  });
   const meta = JSON.parse(out);
   return Float32Array.from(meta.vector);
 }
