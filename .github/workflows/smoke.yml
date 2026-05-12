@@ -1,0 +1,69 @@
+name: smoke
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  template-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate JSON configs
+        run: |
+          python3 -m json.tool data/sources/github-watchlist.json >/tmp/github-watchlist.json
+          python3 -m json.tool data/sources/github-watchlist.example.json >/tmp/github-watchlist.example.json
+          python3 -m json.tool package.json >/tmp/package.json
+
+      - name: Build wiki search index
+        run: tools/search/build.sh
+
+      - name: Query search index
+        run: node tools/search/search.js "github ingestion" --bm25-only
+
+      - name: Run GitHub ingestion dry-run
+        run: node tools/ingestion/github-daily-ingest.js --dry-run --limit 3
+
+      - name: Scan for accidental secrets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          patterns = [
+              'gh' + 'p_',
+              'github' + '_pat_',
+              'BEGIN ' + 'PRIVATE KEY',
+              'AK' + 'IA',
+              'xo' + 'xb-',
+              'ns' + 'ec',
+          ]
+          allowlist = {
+              'docs/PRIVACY_AND_DATA.md',
+              '.agents/skills/privacy-redaction-review/SKILL.md',
+              '.github/workflows/smoke.yml',
+          }
+          hits = []
+          for p in Path('.').rglob('*'):
+              if '.git' in p.parts or not p.is_file():
+                  continue
+              rel = str(p)
+              if rel.startswith('./'):
+                  rel = rel[2:]
+              if rel in allowlist:
+                  continue
+              text = p.read_text(errors='ignore')
+              for pattern in patterns:
+                  if pattern in text:
+                      hits.append(f'{rel}: {pattern}')
+          if hits:
+              print('\n'.join(hits))
+              raise SystemExit(1)
+          print('No accidental secret patterns found.')
+          PY
