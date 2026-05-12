@@ -62,6 +62,8 @@ jobs:
           for p in Path('.').rglob('*'):
               if '.git' in p.parts or not p.is_file():
                   continue
+              if len(p.parts) >= 2 and p.parts[0] == 'data' and p.parts[1] == 'raw':
+                  continue
               rel = str(p)
               if rel.startswith('./'):
                   rel = rel[2:]
