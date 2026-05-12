@@ -1,0 +1,39 @@
+name: wiki-index
+
+on:
+  pull_request:
+    paths:
+      - "wiki/**"
+      - "tools/search/**"
+  push:
+    branches: [main]
+    paths:
+      - "wiki/**"
+      - "tools/search/**"
+
+jobs:
+  build-wiki-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build wiki search index
+        run: tools/search/build.sh
+
+      - name: Query search index
+        run: node tools/search/search.js "github ingestion" --bm25-only
+
+      - name: Upload index artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wiki-search-index
+          path: |
+            data/search/chunks.jsonl
+            data/search/bm25-index.json
+          retention-days: 7
