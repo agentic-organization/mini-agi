@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "description": "GitHub repositories and organizations to observe during raw ingestion.",
+  "defaults": {
+    "include_archived": false,
+    "include_forks": false,
+    "repo_endpoints": [
+      "repo",
+      "events",
+      "issues_updated",
+      "pulls_updated",
+      "commits_since",
+      "releases"
+    ]
+  },
+  "sources": []
+}

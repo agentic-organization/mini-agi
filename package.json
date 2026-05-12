@@ -1,0 +1,12 @@
+{
+  "name": "mini-agi-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Template repository for agent-maintained organizational memory.",
+  "scripts": {
+    "search:build": "tools/search/build.sh",
+    "search": "node tools/search/search.js",
+    "github:daily:dry-run": "node tools/ingestion/github-daily-ingest.js --dry-run --limit 3"
+  },
+  "license": "MIT"
+}

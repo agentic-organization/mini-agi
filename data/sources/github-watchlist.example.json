@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "description": "Example GitHub watchlist. Copy entries into github-watchlist.json and edit for your organization.",
+  "defaults": {
+    "include_archived": false,
+    "include_forks": false,
+    "repo_endpoints": [
+      "repo",
+      "events",
+      "issues_updated",
+      "pulls_updated",
+      "commits_since",
+      "releases"
+    ]
+  },
+  "sources": [
+    {
+      "id": "example-org",
+      "type": "github_org",
+      "owner": "example-org",
+      "mode": "all_public_non_archived",
+      "include_archived": false,
+      "include_forks": false,
+      "projects": [
+        "[[projects/example-platform]]"
+      ],
+      "enabled": false
+    },
+    {
+      "id": "example-single-repos",
+      "type": "github_repos",
+      "repos": [
+        {
+          "owner": "example-owner",
+          "name": "example-repo",
+          "project": "[[projects/example-project]]"
+        }
+      ],
+      "enabled": false
+    }
+  ]
+}

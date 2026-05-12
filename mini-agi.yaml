@@ -1,0 +1,27 @@
+# Organization-level configuration for this mini-agi memory repo.
+# Tools currently read source-specific JSON files under data/sources/;
+# this file is the human/agent entry point for configuring the installation.
+
+organization:
+  name: "Example Organization"
+  slug: "example-org"
+  description: "Replace with a one-sentence description of the organization."
+
+workflow:
+  default_branch: "main"
+  require_pull_requests: true
+  raw_evidence_first: true
+
+sources:
+  github_watchlist: "data/sources/github-watchlist.json"
+
+wiki:
+  root: "wiki"
+  link_style: "wikilink"
+  preserve_history_sections: true
+
+search:
+  bm25_index: "data/search/bm25-index.json"
+  chunks: "data/search/chunks.jsonl"
+  embeddings: "data/search/embeddings.bin"
+  embeddings_meta: "data/search/embeddings.meta.json"
