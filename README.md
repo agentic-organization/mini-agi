@@ -14,6 +14,8 @@ The repository is **not** the agent runtime. It is the agent's durable memory: s
 
 ## Quick start
 
+See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) for the full onboarding flow.
+
 1. Create a repo from this template.
 2. Edit `mini-agi.yaml` with your organization name and operating preferences.
 3. Edit `data/sources/github-watchlist.json` with the GitHub orgs/repos you want to observe.
@@ -46,6 +48,15 @@ Observe → Ingest raw evidence → Synthesize wiki pages → Cross-link → Ope
  AGENTS.md     operating instructions for agents working in this repo
  mini-agi.yaml organization-level configuration
 ```
+
+## Documentation
+
+- [Getting started](docs/GETTING_STARTED.md)
+- [Configuration](docs/CONFIGURATION.md)
+- [Operating loop](docs/OPERATING_LOOP.md)
+- [Ingestion pipeline](docs/INGESTION_PIPELINE.md)
+- [Privacy and data handling](docs/PRIVACY_AND_DATA.md)
+- [Example walkthrough](docs/EXAMPLE_WALKTHROUGH.md)
 
 ## Search
 

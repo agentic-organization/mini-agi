@@ -132,10 +132,16 @@ Before editing, load relevant skills from `.agents/skills/` if your agent runtim
 
 Important skills:
 
-- `llm-wiki` — wiki synthesis conventions.
+- `mini-agi-onboarding` — set up a new repository from the template.
+- `source-watchlist-management` — add and maintain observed sources.
+- `ingestion-pipeline` — validate and extend staged source ingestion.
 - `github-daily-ingestion` — daily GitHub evidence pipeline.
 - `github-org-discovery` — bootstrap a GitHub organization into wiki pages.
+- `evidence-to-wiki-synthesis` — turn raw evidence into compact wiki updates.
+- `llm-wiki` — wiki synthesis conventions.
 - `wiki-search` — build and query local search.
+- `privacy-redaction-review` — check for secrets and sensitive data before publishing.
+- `template-release-audit` — verify the template remains generic and usable.
 - `pr-workflow` — branch, commit, push, and open a PR.
 
 Never commit credentials or private tokens. Never write source-derived secrets into the public wiki.

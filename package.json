@@ -4,8 +4,10 @@
   "private": true,
   "description": "Template repository for agent-maintained organizational memory.",
   "scripts": {
+    "test": "node tests/pipeline-manifest.test.js",
     "search:build": "tools/search/build.sh",
     "search": "node tools/search/search.js",
+    "pipeline:list": "node tools/pipeline/list-runs.js",
     "github:daily:dry-run": "node tools/ingestion/github-daily-ingest.js --dry-run --limit 3"
   },
   "license": "MIT"
